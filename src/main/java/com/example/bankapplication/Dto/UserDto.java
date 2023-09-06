@@ -21,5 +21,4 @@ public class UserDto {
     private String email;
     private String phoneNumber;
     private String alternativePhoneNumber;
-    private String status;
 }
