@@ -1,5 +1,6 @@
 package com.example.bankapplication.Service.ServiceImpl;
 
+import com.example.bankapplication.Dto.AccountInfo;
 import com.example.bankapplication.Dto.BankResponseDto;
 import com.example.bankapplication.Dto.UserDto;
 import com.example.bankapplication.Entity.User;
@@ -44,6 +45,12 @@ public class UserServiceImpl implements UserService {
         return BankResponseDto.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREATION_CODE)
                 .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
+                .accountInfo(AccountInfo.builder()
+                        .accountBalance(savedUser.getAccountBalance())
+                        .accountNumber(savedUser.getAccountNumber())
+                        .accountName(savedUser.getFirstName()+ " "+savedUser.getLastName()+ " "+savedUser.getOtherName())
+                        .build())
                 .build();
+
     }
 }
