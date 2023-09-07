@@ -25,6 +25,7 @@ public class User {
     private String firstName;
     private String lastName;
     private String otherName;
+    @Enumerated(value = EnumType.STRING)
     private Gender gender;
     private String address;
     private String stateOfOrigin;
