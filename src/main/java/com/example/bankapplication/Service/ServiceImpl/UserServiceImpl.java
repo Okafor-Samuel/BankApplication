@@ -2,9 +2,11 @@ package com.example.bankapplication.Service.ServiceImpl;
 
 import com.example.bankapplication.Dto.AccountInfo;
 import com.example.bankapplication.Dto.BankResponseDto;
+import com.example.bankapplication.Dto.EmailDto;
 import com.example.bankapplication.Dto.UserDto;
 import com.example.bankapplication.Entity.User;
 import com.example.bankapplication.Repository.UserRepository;
+import com.example.bankapplication.Service.EmailService;
 import com.example.bankapplication.Service.UserService;
 import com.example.bankapplication.Utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final EmailService emailService;
     @Override
     public BankResponseDto createAccount(UserDto userDto) {
         if(userRepository.existsByEmail(userDto.getEmail())){
@@ -42,6 +45,18 @@ public class UserServiceImpl implements UserService {
                 .status("ACTIVE")
                 .build();
         var savedUser = userRepository.save(newUser);
+
+        //Send email alert
+        var emailDto = EmailDto.builder()
+                .recipient(savedUser.getEmail())
+                .subject("ACCOUNT CREATION")
+                .messageBody("Congratulations, your account have been successfully created. \nAccount Details: \n"+
+                "Account Name: "+savedUser.getFirstName()+" "+savedUser.getLastName()+" "+
+                        savedUser.getOtherName()+" \nAccount Number: "+
+                        savedUser.getAccountNumber())
+                .build();
+        emailService.sendEmailAlert(emailDto);
+
         return BankResponseDto.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREATION_CODE)
                 .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
