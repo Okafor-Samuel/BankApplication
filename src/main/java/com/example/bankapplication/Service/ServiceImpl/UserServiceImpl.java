@@ -93,6 +93,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String nameEnquiry(EnquiryDto enquiryDto) {
-        return null;
+        boolean isAccountExists = userRepository.existsByAccountNumber(enquiryDto.getAccountNumber());
+        if(!isAccountExists){
+            return AccountUtils.ACCOUNT_DOES_NOT_EXISTS_MESSAGE;
+        }
+        var foundUser = userRepository.findByAccountNumber(enquiryDto.getAccountNumber());
+        var targetUser = foundUser.get();
+        return targetUser.getFirstName()+" "+targetUser.getLastName()+" "+targetUser.getOtherName();
     }
 }
