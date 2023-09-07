@@ -1,9 +1,6 @@
 package com.example.bankapplication.Service.ServiceImpl;
 
-import com.example.bankapplication.Dto.AccountInfo;
-import com.example.bankapplication.Dto.BankResponseDto;
-import com.example.bankapplication.Dto.EmailDto;
-import com.example.bankapplication.Dto.UserDto;
+import com.example.bankapplication.Dto.*;
 import com.example.bankapplication.Entity.User;
 import com.example.bankapplication.Repository.UserRepository;
 import com.example.bankapplication.Service.EmailService;
@@ -67,5 +64,35 @@ public class UserServiceImpl implements UserService {
                         .build())
                 .build();
 
+    }
+
+    //Balance Enquiry, Name Enquiry, Credit, Debit, Transfer
+
+    @Override
+    public BankResponseDto balanceEnquiry(EnquiryDto enquiryDto) {
+        boolean isAccountExists = userRepository.existsByAccountNumber(enquiryDto.getAccountNumber());
+        if(!isAccountExists){
+            return BankResponseDto.builder()
+                    .responseCode(AccountUtils.ACCOUNT_DOES_NOT_EXISTS_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_DOES_NOT_EXISTS_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
+        var foundUser = userRepository.findByAccountNumber(enquiryDto.getAccountNumber());
+        var targetUser = foundUser.get();
+        return BankResponseDto.builder()
+                .responseCode(AccountUtils.ACCOUNT_FOUND_CODE)
+                .responseMessage(AccountUtils.ACCOUNT_FOUND_MESSAGE)
+                .accountInfo(AccountInfo.builder()
+                        .accountBalance(targetUser.getAccountBalance())
+                        .accountNumber(targetUser.getAccountNumber())
+                        .accountName(targetUser.getFirstName()+" "+targetUser.getLastName()+" "+targetUser.getOtherName())
+                        .build())
+                .build();
+    }
+
+    @Override
+    public String nameEnquiry(EnquiryDto enquiryDto) {
+        return null;
     }
 }
