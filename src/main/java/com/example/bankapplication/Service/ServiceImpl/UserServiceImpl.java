@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -127,6 +128,42 @@ public class UserServiceImpl implements UserService {
                         .accountNumber(transactionDto.getAccountNumber())
                         .build())
                 .build();
+
+    }
+    @Override
+    public BankResponseDto debitAccount(TransactionDto transactionDto) {
+        boolean isAccountExists = userRepository.existsByAccountNumber(transactionDto.getAccountNumber());
+        if(!isAccountExists){
+            return BankResponseDto.builder()
+                    .responseCode(AccountUtils.ACCOUNT_DOES_NOT_EXISTS_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_DOES_NOT_EXISTS_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
+        var userToDebit= userRepository.findByAccountNumber(transactionDto.getAccountNumber());
+        var targetUser= userToDebit.get();
+        BigInteger availableBalance= targetUser.getAccountBalance().toBigInteger();
+        BigInteger debitAmount= transactionDto.getAmount().toBigInteger();
+        if(availableBalance.intValue() < debitAmount.intValue()){
+            return BankResponseDto.builder()
+                    .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
+                    .responseMessage(AccountUtils.INSUFFICIENT_BALANCES_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
+        else {
+             targetUser.setAccountBalance(targetUser.getAccountBalance().subtract(transactionDto.getAmount()));
+             userRepository.save(targetUser);
+             return BankResponseDto.builder()
+                     .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS_CODE)
+                     .responseMessage(AccountUtils.ACCOUNT_DEBITED_SUCCESS_MESSAGE)
+                     .accountInfo(AccountInfo.builder()
+                             .accountNumber(transactionDto.getAccountNumber())
+                             .accountName(targetUser.getFirstName()+" "+targetUser.getLastName()+" "+targetUser.getOtherName())
+                             .accountBalance(targetUser.getAccountBalance())
+                             .build())
+                     .build();
+        }
 
     }
 }
