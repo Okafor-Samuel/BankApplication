@@ -1,13 +1,12 @@
 package com.example.bankapplication.Controller;
 
 import com.example.bankapplication.Dto.BankResponseDto;
+import com.example.bankapplication.Dto.EnquiryDto;
+import com.example.bankapplication.Dto.TransactionDto;
 import com.example.bankapplication.Dto.UserDto;
 import com.example.bankapplication.Service.ServiceImpl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -17,5 +16,18 @@ public class UserController {
     @PostMapping("/create-account")
     public BankResponseDto createAccount(@RequestBody UserDto userDto){
         return userServiceImpl.createAccount(userDto);
+    }
+
+    @GetMapping("/balance-enquiry")
+    public BankResponseDto balanceEnquiry(@RequestBody EnquiryDto enquiryDto){
+        return userServiceImpl.balanceEnquiry(enquiryDto);
+    }
+    @GetMapping("/name-enquiry")
+    public String nameEnquiry(@RequestBody EnquiryDto enquiryDto){
+        return userServiceImpl.nameEnquiry(enquiryDto);
+    }
+    @PostMapping("/credit")
+    public BankResponseDto creditAccount(@RequestBody TransactionDto transactionDto){
+        return  userServiceImpl.creditAccount(transactionDto);
     }
 }
