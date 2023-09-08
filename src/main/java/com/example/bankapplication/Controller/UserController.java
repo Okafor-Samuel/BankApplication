@@ -1,9 +1,6 @@
 package com.example.bankapplication.Controller;
 
-import com.example.bankapplication.Dto.BankResponseDto;
-import com.example.bankapplication.Dto.EnquiryDto;
-import com.example.bankapplication.Dto.TransactionDto;
-import com.example.bankapplication.Dto.UserDto;
+import com.example.bankapplication.Dto.*;
 import com.example.bankapplication.Service.ServiceImpl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +29,10 @@ public class UserController {
     }
     @PostMapping("/debit")
     public BankResponseDto debitAccount(@RequestBody TransactionDto transactionDto){
-        return  userServiceImpl.debitAccount(transactionDto);
+        return  userServiceImpl.debitAccount( transactionDto);
+    }
+    @PostMapping("/transfer")
+    public BankResponseDto transfer(@RequestBody TransferDto transferDto){
+        return userServiceImpl.transfer(transferDto);
     }
 }
