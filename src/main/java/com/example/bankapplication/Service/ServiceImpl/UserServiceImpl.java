@@ -101,4 +101,30 @@ public class UserServiceImpl implements UserService {
         var targetUser = foundUser.get();
         return targetUser.getFirstName()+" "+targetUser.getLastName()+" "+targetUser.getOtherName();
     }
+
+    //Transaction
+    @Override
+    public BankResponseDto creditAccount(TransactionDto transactionDto) {
+        //if account exists or not
+        boolean isAccountExists = userRepository.existsByAccountNumber(transactionDto.getAccountNumber());
+        if(!isAccountExists){
+            return BankResponseDto.builder()
+                    .responseCode(AccountUtils.ACCOUNT_DOES_NOT_EXISTS_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_DOES_NOT_EXISTS_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
+        var userToCredit = userRepository.findByAccountNumber(transactionDto.getAccountNumber());
+        var tartgetUser = userToCredit.get();
+        tartgetUser.setAccountBalance(tartgetUser.getAccountBalance().add(transactionDto.getAmount()));
+        return BankResponseDto.builder()
+                .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS_CODE)
+                .responseMessage(AccountUtils.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
+                .accountInfo(AccountInfo.builder()
+                        .accountName(tartgetUser.getFirstName()+" "+tartgetUser.getLastName()+" "+tartgetUser.getOtherName())
+                        .accountBalance(tartgetUser.getAccountBalance())
+                        .accountNumber(transactionDto.getAccountNumber())
+                        .build())
+                .build();
+    }
 }
