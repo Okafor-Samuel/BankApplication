@@ -1,9 +1,6 @@
 package com.example.bankapplication.Service;
 
-import com.example.bankapplication.Dto.BankResponseDto;
-import com.example.bankapplication.Dto.EnquiryDto;
-import com.example.bankapplication.Dto.TransactionDto;
-import com.example.bankapplication.Dto.UserDto;
+import com.example.bankapplication.Dto.*;
 
 public interface UserService {
     BankResponseDto createAccount(UserDto userDto);
@@ -11,4 +8,5 @@ public interface UserService {
     String nameEnquiry(EnquiryDto enquiryDto);
     BankResponseDto creditAccount(TransactionDto transactionDto);
     BankResponseDto debitAccount(TransactionDto transactionDto);
+    BankResponseDto transfer(TransferDto transferDto);
 }
