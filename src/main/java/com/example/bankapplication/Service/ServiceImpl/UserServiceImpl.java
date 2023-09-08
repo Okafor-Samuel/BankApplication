@@ -193,7 +193,7 @@ public class UserServiceImpl implements UserService {
         var debitAlert = EmailDto.builder()
                 .subject("DEBIT ALERT")
                 .recipient(sourceUser.getEmail())
-                .messageBody("The sum of "+transferDto.getAmount()+" has been debited from your account to. Your current balance is "
+                .messageBody("The sum of "+transferDto.getAmount()+" has been debited from your account. Your current balance is "
                 +sourceUser.getAccountBalance())
                 .build();
         emailService.sendEmailAlert(debitAlert);
