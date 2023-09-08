@@ -10,4 +10,5 @@ public interface UserService {
     BankResponseDto balanceEnquiry(EnquiryDto enquiryDto);
     String nameEnquiry(EnquiryDto enquiryDto);
     BankResponseDto creditAccount(TransactionDto transactionDto);
+    BankResponseDto debitAccount(TransactionDto transactionDto);
 }
