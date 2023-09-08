@@ -2,6 +2,7 @@ package com.example.bankapplication.Service.ServiceImpl;
 
 import com.example.bankapplication.Dto.*;
 import com.example.bankapplication.Entity.User;
+import com.example.bankapplication.Repository.AccountTransactionRepository;
 import com.example.bankapplication.Repository.UserRepository;
 import com.example.bankapplication.Service.EmailService;
 import com.example.bankapplication.Service.UserService;
@@ -17,6 +18,7 @@ import java.math.BigInteger;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final AccountTransactionServiceImpl transactionServiceImpl;
     @Override
     public BankResponseDto createAccount(UserDto userDto) {
         if(userRepository.existsByEmail(userDto.getEmail())){
@@ -116,15 +118,23 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
         var userToCredit = userRepository.findByAccountNumber(transactionDto.getAccountNumber());
-        var tartgetUser = userToCredit.get();
-        tartgetUser.setAccountBalance(tartgetUser.getAccountBalance().add(transactionDto.getAmount()));
-        userRepository.save(tartgetUser);
+        var targetUser = userToCredit.get();
+        targetUser.setAccountBalance(targetUser.getAccountBalance().add(transactionDto.getAmount()));
+        userRepository.save(targetUser);
+        //accountTransaction implementation to keep record
+        var accountTransactionDto = AccountTransactionDto.builder()
+                .accountNumber(targetUser.getAccountNumber())
+                .transactionType("CREDIT")
+                .transactionAmount(transactionDto.getAmount() )
+                .build();
+        transactionServiceImpl.saveTransaction(accountTransactionDto);
+
         return BankResponseDto.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS_CODE)
                 .responseMessage(AccountUtils.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
                 .accountInfo(AccountInfo.builder()
-                        .accountName(tartgetUser.getFirstName()+" "+tartgetUser.getLastName()+" "+tartgetUser.getOtherName())
-                        .accountBalance(tartgetUser.getAccountBalance())
+                        .accountName(targetUser.getFirstName()+" "+targetUser.getLastName()+" "+targetUser.getOtherName())
+                        .accountBalance(targetUser.getAccountBalance())
                         .accountNumber(transactionDto.getAccountNumber())
                         .build())
                 .build();
@@ -154,6 +164,13 @@ public class UserServiceImpl implements UserService {
         else {
              targetUser.setAccountBalance(targetUser.getAccountBalance().subtract(transactionDto.getAmount()));
              userRepository.save(targetUser);
+            //accountTransaction implementation to keep record
+            var accountTransactionDto = AccountTransactionDto.builder()
+                    .accountNumber(targetUser.getAccountNumber())
+                    .transactionType("DEBIT")
+                    .transactionAmount(transactionDto.getAmount() )
+                    .build();
+            transactionServiceImpl.saveTransaction(accountTransactionDto);
              return BankResponseDto.builder()
                      .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS_CODE)
                      .responseMessage(AccountUtils.ACCOUNT_DEBITED_SUCCESS_MESSAGE)
@@ -190,6 +207,13 @@ public class UserServiceImpl implements UserService {
         sourceUser.setAccountBalance(sourceUser.getAccountBalance().subtract(transferDto.getAmount()));
         String sourceName = sourceUser.getFirstName()+" "+sourceUser.getLastName()+" "+sourceUser.getOtherName();
         userRepository.save(sourceUser);
+        //accountTransaction implementation to keep record
+        var accountTransactionDto = AccountTransactionDto.builder()
+                .accountNumber(sourceUser.getAccountNumber())
+                .transactionType("DEBIT TRANSACTION")
+                .transactionAmount(transferDto.getAmount() )
+                .build();
+        transactionServiceImpl.saveTransaction(accountTransactionDto);
         var debitAlert = EmailDto.builder()
                 .subject("DEBIT ALERT")
                 .recipient(sourceUser.getEmail())
@@ -203,6 +227,13 @@ public class UserServiceImpl implements UserService {
         destinationUser.setAccountBalance(destinationUser.getAccountBalance().add(transferDto.getAmount()));
         //String destinationName = destinationUser.getFirstName()+" "+destinationUser.getLastName()+" "+destinationUser.getOtherName();
         userRepository.save(destinationUser);
+        //accountTransaction implementation to keep record
+        var accountTransactionDto1 = AccountTransactionDto.builder()
+                .accountNumber(destinationUser.getAccountNumber())
+                .transactionType("CREDIT")
+                .transactionAmount(transferDto.getAmount() )
+                .build();
+        transactionServiceImpl.saveTransaction(accountTransactionDto);
         var creditAlert = EmailDto.builder()
                 .subject("CREDIT ALERT")
                 .recipient(destinationUser.getEmail())
