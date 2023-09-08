@@ -117,6 +117,7 @@ public class UserServiceImpl implements UserService {
         var userToCredit = userRepository.findByAccountNumber(transactionDto.getAccountNumber());
         var tartgetUser = userToCredit.get();
         tartgetUser.setAccountBalance(tartgetUser.getAccountBalance().add(transactionDto.getAmount()));
+        userRepository.save(tartgetUser);
         return BankResponseDto.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS_CODE)
                 .responseMessage(AccountUtils.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
@@ -126,5 +127,6 @@ public class UserServiceImpl implements UserService {
                         .accountNumber(transactionDto.getAccountNumber())
                         .build())
                 .build();
+
     }
 }
