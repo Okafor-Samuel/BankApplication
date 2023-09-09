@@ -2,6 +2,7 @@ package com.example.bankapplication.Service.ServiceImpl;
 
 import com.example.bankapplication.Dto.EmailDto;
 import com.example.bankapplication.Service.EmailService;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -30,6 +31,11 @@ public class EmailServiceImpl implements EmailService {
         } catch (MailException e) {
             throw new RuntimeException(e);
         }
+
+    }
+
+    @Override
+    public void sendEmailWithAttachment(EmailDto emailDto) {
 
     }
 }
