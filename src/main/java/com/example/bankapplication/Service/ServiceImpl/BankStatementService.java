@@ -1,8 +1,10 @@
 package com.example.bankapplication.Service.ServiceImpl;
 
+import com.example.bankapplication.Dto.EmailDto;
 import com.example.bankapplication.Entity.AccountTransaction;
 import com.example.bankapplication.Repository.AccountTransactionRepository;
 import com.example.bankapplication.Repository.UserRepository;
+import com.example.bankapplication.Service.EmailService;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -26,6 +28,7 @@ import java.util.List;
 public class BankStatementService {
     private final AccountTransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final EmailServiceImpl emailServiceImpl;
     private static final String FILE ="/Users/decagon/Documents/BankAppStatement.pdf";
 
     public List<AccountTransaction> generateStatement(String accountNumber, String startDate, String endDate) throws DocumentException, FileNotFoundException {
@@ -116,6 +119,14 @@ public class BankStatementService {
         document.add(transactionTable);
 
         document.close();
+
+        EmailDto emailDto = EmailDto.builder()
+                .recipient(user.get().getEmail())
+                .subject("STATEMENT OF ACCOUNT")
+                .messageBody("Kindly find your requested account statement attached")
+                .attachment(FILE)
+                .build();
+        emailServiceImpl.sendEmailWithAttachment(emailDto);
 
         return transactionList;
 
