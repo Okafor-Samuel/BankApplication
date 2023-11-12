@@ -8,6 +8,7 @@ import com.example.bankapplication.Service.EmailService;
 import com.example.bankapplication.Service.UserService;
 import com.example.bankapplication.Utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final AccountTransactionServiceImpl transactionServiceImpl;
+    private final PasswordEncoder passwordEncoder;
     @Override
     public BankResponseDto createAccount(UserDto userDto) {
         if(userRepository.existsByEmail(userDto.getEmail())){
@@ -40,6 +42,7 @@ public class UserServiceImpl implements UserService {
                 .accountNumber(AccountUtils.generateAccountNumber())
                 .accountBalance(BigDecimal.ZERO)
                 .email(userDto.getEmail())
+                .password(passwordEncoder.encode(userDto.getPassword()))
                 .phoneNumber(userDto.getPhoneNumber())
                 .alternativePhoneNumber(userDto.getAlternativePhoneNumber())
                 .status("ACTIVE")
