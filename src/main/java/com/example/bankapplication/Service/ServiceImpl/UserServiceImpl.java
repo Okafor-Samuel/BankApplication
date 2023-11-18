@@ -1,5 +1,6 @@
 package com.example.bankapplication.Service.ServiceImpl;
 
+import com.example.bankapplication.Configuration.JwtTokenProvider;
 import com.example.bankapplication.Dto.*;
 import com.example.bankapplication.Entity.User;
 import com.example.bankapplication.Repository.AccountTransactionRepository;
@@ -7,7 +8,11 @@ import com.example.bankapplication.Repository.UserRepository;
 import com.example.bankapplication.Service.EmailService;
 import com.example.bankapplication.Service.UserService;
 import com.example.bankapplication.Utils.AccountUtils;
+import jakarta.persistence.Entity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +26,8 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final AccountTransactionServiceImpl transactionServiceImpl;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
     @Override
     public BankResponseDto createAccount(UserDto userDto) {
         if(userRepository.existsByEmail(userDto.getEmail())){
@@ -70,6 +77,23 @@ public class UserServiceImpl implements UserService {
                         .build())
                 .build();
 
+    }
+
+    public BankResponseDto logIn(LoginDto loginDto){
+        Authentication authentication = null;
+        authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginDto.getPassword(), loginDto.getEmail()));
+
+        EmailDto loginAlert = EmailDto.builder()
+                .subject("You are logged in!")
+                .recipient(loginDto.getEmail())
+                .messageBody("You logged into your account. If you did not initiate this request, please contact your bank")
+                .build();
+        emailService.sendEmailAlert(loginAlert);
+        return  BankResponseDto.builder()
+                .responseCode("Login success")
+                .responseMessage(jwtTokenProvider.generateToken(authentication))
+                .build();
     }
 
     //Balance Enquiry, Name Enquiry, Credit, Debit, Transfer
@@ -250,4 +274,5 @@ public class UserServiceImpl implements UserService {
                 .accountInfo(null)
                 .build();
     }
+
 }
